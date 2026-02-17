@@ -1,0 +1,886 @@
+openapi: 3.1.0
+info:
+  title: BlogBurst API
+  description: |
+    BlogBurst is an AI-powered content creation and distribution platform.
+    Generate blog posts, repurpose content for social media, discover trending topics,
+    brainstorm titles, and publish to multiple platforms — all from a single API.
+  version: 1.0.0
+  contact:
+    name: BlogBurst Support
+    url: https://blogburst.ai
+    email: support@blogburst.ai
+
+servers:
+  - url: https://api.blogburst.ai/api/v1
+    description: Production
+
+security:
+  - apiKey: []
+
+components:
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: |
+        API key for authentication. Obtain one from the BlogBurst dashboard
+        at https://blogburst.ai/dashboard under API Keys.
+
+  schemas:
+    # --- Enums ---
+    Tone:
+      type: string
+      enum:
+        - professional
+        - casual
+        - witty
+        - educational
+        - inspirational
+      description: Writing tone for generated content.
+
+    Language:
+      type: string
+      enum:
+        - en
+        - zh
+      description: Output language code.
+
+    BlogLength:
+      type: string
+      enum:
+        - short
+        - medium
+        - long
+      description: |
+        Blog post length.
+        - short: 500-800 words (3-4 min read)
+        - medium: 1000-1500 words (5-7 min read)
+        - long: 2000-3000 words (10-15 min read)
+
+    Platform:
+      type: string
+      enum:
+        - twitter
+        - linkedin
+        - reddit
+        - bluesky
+        - threads
+        - telegram
+        - discord
+        - tiktok
+        - youtube
+      description: Target social media platform.
+
+    # --- Shared ---
+    UsageInfo:
+      type: object
+      properties:
+        tokens_used:
+          type: integer
+          description: Number of tokens consumed.
+        cost:
+          type: number
+          format: float
+          description: Cost in USD.
+        model:
+          type: string
+          description: AI model used for generation.
+
+    ErrorDetail:
+      type: object
+      properties:
+        detail:
+          type: string
+          description: Human-readable error message.
+
+    # --- Blog Generate ---
+    BlogGenerateRequest:
+      type: object
+      required:
+        - topic
+      properties:
+        topic:
+          type: string
+          minLength: 5
+          maxLength: 500
+          description: Blog topic or keywords.
+          example: The future of artificial intelligence in healthcare
+        tone:
+          $ref: "#/components/schemas/Tone"
+          default: professional
+        language:
+          $ref: "#/components/schemas/Language"
+          default: en
+        length:
+          $ref: "#/components/schemas/BlogLength"
+          default: medium
+
+    BlogGenerateResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        title:
+          type: string
+          description: Generated blog title.
+        content:
+          type: string
+          description: Full blog post in Markdown.
+        summary:
+          type: string
+          description: Short summary of the blog post.
+        keywords:
+          type: array
+          items:
+            type: string
+          description: SEO keywords extracted from the content.
+        usage:
+          $ref: "#/components/schemas/UsageInfo"
+
+    # --- Repurpose ---
+    RepurposeRequest:
+      type: object
+      required:
+        - content
+        - platforms
+      properties:
+        content:
+          type: string
+          minLength: 10
+          maxLength: 100000
+          description: Blog text or a URL to a blog post.
+          example: "https://example.com/my-blog-post"
+        platforms:
+          type: array
+          items:
+            $ref: "#/components/schemas/Platform"
+          minItems: 1
+          maxItems: 5
+          description: Target platforms for repurposed content.
+          example:
+            - twitter
+            - linkedin
+            - bluesky
+        tone:
+          $ref: "#/components/schemas/Tone"
+          default: professional
+        language:
+          $ref: "#/components/schemas/Language"
+          default: en
+
+    TwitterOutput:
+      type: object
+      properties:
+        thread:
+          type: array
+          items:
+            type: string
+          description: Array of tweet texts forming a thread.
+
+    LinkedInOutput:
+      type: object
+      properties:
+        post:
+          type: string
+          description: LinkedIn post text.
+        hashtags:
+          type: array
+          items:
+            type: string
+
+    RedditOutput:
+      type: object
+      properties:
+        title:
+          type: string
+        body:
+          type: string
+        suggestedSubreddits:
+          type: array
+          items:
+            type: string
+
+    BlueskyOutput:
+      type: object
+      properties:
+        posts:
+          type: array
+          items:
+            type: string
+          description: Array of Bluesky posts (300 char limit each).
+
+    ThreadsOutput:
+      type: object
+      properties:
+        post:
+          type: string
+        suggestImage:
+          type: boolean
+        imagePrompt:
+          type: string
+          nullable: true
+
+    TelegramOutput:
+      type: object
+      properties:
+        post:
+          type: string
+        suggestImage:
+          type: boolean
+          nullable: true
+        imagePrompt:
+          type: string
+          nullable: true
+
+    DiscordOutput:
+      type: object
+      properties:
+        post:
+          type: string
+        embed:
+          type: object
+          nullable: true
+          additionalProperties:
+            type: string
+
+    TikTokOutput:
+      type: object
+      properties:
+        hook:
+          type: string
+          description: Attention-grabbing opening line.
+        script:
+          type: string
+          description: Full video script.
+        caption:
+          type: string
+          description: Video caption text.
+        hashtags:
+          type: array
+          items:
+            type: string
+        suggestedSounds:
+          type: array
+          items:
+            type: string
+          nullable: true
+
+    YouTubeOutput:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        script:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        thumbnailIdea:
+          type: string
+          nullable: true
+
+    RepurposeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        source:
+          type: object
+          description: Parsed source content metadata.
+          properties:
+            title:
+              type: string
+            content:
+              type: string
+            source:
+              type: string
+        twitter:
+          $ref: "#/components/schemas/TwitterOutput"
+          nullable: true
+        linkedin:
+          $ref: "#/components/schemas/LinkedInOutput"
+          nullable: true
+        reddit:
+          $ref: "#/components/schemas/RedditOutput"
+          nullable: true
+        bluesky:
+          $ref: "#/components/schemas/BlueskyOutput"
+          nullable: true
+        threads:
+          $ref: "#/components/schemas/ThreadsOutput"
+          nullable: true
+        errors:
+          type: array
+          items:
+            type: object
+          description: Errors for platforms that failed generation.
+        usage:
+          $ref: "#/components/schemas/UsageInfo"
+
+    # --- Platform Content ---
+    PlatformContentRequest:
+      type: object
+      required:
+        - topic
+        - platforms
+      properties:
+        topic:
+          type: string
+          minLength: 5
+          maxLength: 500
+          description: Topic or keywords to write about.
+          example: 5 tips for better productivity
+        platforms:
+          type: array
+          items:
+            $ref: "#/components/schemas/Platform"
+          minItems: 1
+          maxItems: 9
+          description: Target platforms.
+          example:
+            - twitter
+            - linkedin
+            - tiktok
+        tone:
+          $ref: "#/components/schemas/Tone"
+          default: professional
+        language:
+          $ref: "#/components/schemas/Language"
+          default: en
+
+    PlatformContentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        topic:
+          type: string
+        twitter:
+          $ref: "#/components/schemas/TwitterOutput"
+          nullable: true
+        linkedin:
+          $ref: "#/components/schemas/LinkedInOutput"
+          nullable: true
+        reddit:
+          $ref: "#/components/schemas/RedditOutput"
+          nullable: true
+        bluesky:
+          $ref: "#/components/schemas/BlueskyOutput"
+          nullable: true
+        threads:
+          $ref: "#/components/schemas/ThreadsOutput"
+          nullable: true
+        telegram:
+          $ref: "#/components/schemas/TelegramOutput"
+          nullable: true
+        discord:
+          $ref: "#/components/schemas/DiscordOutput"
+          nullable: true
+        tiktok:
+          $ref: "#/components/schemas/TikTokOutput"
+          nullable: true
+        youtube:
+          $ref: "#/components/schemas/YouTubeOutput"
+          nullable: true
+        errors:
+          type: array
+          items:
+            type: object
+        usage:
+          $ref: "#/components/schemas/UsageInfo"
+
+    # --- Trending Topics ---
+    TrendingTopic:
+      type: object
+      properties:
+        id:
+          type: integer
+        source:
+          type: string
+          description: "Source: hackernews, reddit, google_trends, producthunt"
+        keyword:
+          type: string
+        description:
+          type: string
+          nullable: true
+        url:
+          type: string
+          nullable: true
+        engagement_score:
+          type: number
+          format: float
+        category:
+          type: string
+          nullable: true
+
+    TrendingTopicsResponse:
+      type: object
+      properties:
+        topics:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrendingTopic"
+        count:
+          type: integer
+        sources:
+          type: array
+          items:
+            type: string
+        available_niches:
+          type: array
+          items:
+            type: string
+          example:
+            - marketing
+            - startup
+            - ecommerce
+            - tech
+            - ai
+            - creator
+            - career
+            - crypto
+
+    # --- Title Chat ---
+    ChatMessage:
+      type: object
+      required:
+        - role
+        - content
+      properties:
+        role:
+          type: string
+          enum:
+            - user
+            - assistant
+          description: Message sender role.
+        content:
+          type: string
+          description: Message text.
+
+    TitleChatRequest:
+      type: object
+      required:
+        - messages
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatMessage"
+          minItems: 1
+          maxItems: 20
+          description: Conversation history.
+          example:
+            - role: user
+              content: I want to write about AI in healthcare
+            - role: assistant
+              content: "Great topic! Which aspect interests you most?"
+            - role: user
+              content: Diagnosis assistance
+        language:
+          $ref: "#/components/schemas/Language"
+          default: en
+
+    TitleChatResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        reply:
+          type: string
+          description: AI assistant's response message.
+        suggested_titles:
+          type: array
+          items:
+            type: string
+          description: Suggested titles (may be empty if AI is still asking questions).
+        usage:
+          $ref: "#/components/schemas/UsageInfo"
+
+    # --- Publish ---
+    PublishRequest:
+      type: object
+      required:
+        - platforms
+        - content
+      properties:
+        platforms:
+          type: array
+          items:
+            $ref: "#/components/schemas/Platform"
+          minItems: 1
+          description: Platforms to publish to. Must be connected first.
+          example:
+            - bluesky
+            - telegram
+        content:
+          type: string
+          description: Text content or caption to publish.
+          example: "Check out our latest product update!"
+        image_urls:
+          type: array
+          items:
+            type: string
+            format: uri
+          nullable: true
+          description: Optional image URLs to attach.
+
+    PlatformResult:
+      type: object
+      properties:
+        platform:
+          type: string
+        success:
+          type: boolean
+        post_id:
+          type: string
+          nullable: true
+        post_url:
+          type: string
+          nullable: true
+        error:
+          type: string
+          nullable: true
+
+    PublishResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+          description: Total platforms attempted.
+        successful:
+          type: integer
+        failed:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/PlatformResult"
+
+    # --- Connected Platforms ---
+    ConnectedPlatform:
+      type: object
+      properties:
+        platform:
+          type: string
+        username:
+          type: string
+          nullable: true
+        connected_at:
+          type: string
+          format: date-time
+          nullable: true
+        last_used_at:
+          type: string
+          format: date-time
+          nullable: true
+        capabilities:
+          type: object
+          description: Platform capabilities (text, images, video support).
+
+    ConnectedPlatformsResponse:
+      type: object
+      properties:
+        platforms:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConnectedPlatform"
+
+    # --- Usage ---
+    UsageStats:
+      type: object
+      properties:
+        plan:
+          type: string
+          description: Current plan name (free, pro, team, etc.).
+        limit:
+          type: integer
+          description: Monthly generation limit. -1 means unlimited.
+        used:
+          type: integer
+          description: Generations used this period.
+        remaining:
+          type: integer
+          description: Generations remaining. -1 means unlimited.
+        period_start:
+          type: string
+          format: date-time
+        period_end:
+          type: string
+          format: date-time
+
+    UsageResponse:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        email:
+          type: string
+        stats:
+          $ref: "#/components/schemas/UsageStats"
+        recent_generations:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              platforms:
+                type: array
+                items:
+                  type: string
+              tokens_used:
+                type: integer
+              cost:
+                type: number
+                format: float
+              created_at:
+                type: string
+                format: date-time
+
+paths:
+  /blog/generate:
+    post:
+      operationId: generateBlogPost
+      summary: Generate a blog post
+      description: |
+        Generate a full blog post from a topic using AI.
+        Returns a title, Markdown content, summary, and SEO keywords.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BlogGenerateRequest"
+      responses:
+        "200":
+          description: Blog post generated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogGenerateResponse"
+        "400":
+          description: Invalid tone or length.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetail"
+        "401":
+          description: Missing or invalid API key.
+        "429":
+          description: Usage limit exceeded.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetail"
+
+  /repurpose:
+    post:
+      operationId: repurposeContent
+      summary: Repurpose content for social media
+      description: |
+        Transform blog content (raw text or a URL) into platform-optimized
+        social media posts. Supports Twitter, LinkedIn, Reddit, Bluesky, and Threads.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RepurposeRequest"
+      responses:
+        "200":
+          description: Content repurposed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RepurposeResponse"
+        "400":
+          description: Invalid input (bad URL, content too short, invalid platforms/tone).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetail"
+        "401":
+          description: Missing or invalid API key.
+        "429":
+          description: Usage limit exceeded.
+
+  /blog/platforms:
+    post:
+      operationId: generatePlatformContent
+      summary: Generate platform content from a topic
+      description: |
+        Generate content optimized for multiple social media platforms from a single topic.
+        Unlike /repurpose which transforms existing content, this creates original content
+        from scratch. Supports all 9 platforms including TikTok and YouTube scripts.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatformContentRequest"
+      responses:
+        "200":
+          description: Platform content generated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformContentResponse"
+        "400":
+          description: Invalid input.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetail"
+        "401":
+          description: Missing or invalid API key.
+        "429":
+          description: Usage limit exceeded.
+
+  /assistant/trending-topics:
+    get:
+      operationId: getTrendingTopics
+      summary: Get trending topics
+      description: |
+        Discover currently trending topics from HackerNews, Reddit, Google Trends,
+        and Product Hunt. Filter by niche, source, or category to find relevant
+        content ideas for your audience.
+      parameters:
+        - name: niche
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - marketing
+              - startup
+              - ecommerce
+              - tech
+              - ai
+              - creator
+              - career
+              - crypto
+          description: Filter topics by industry niche.
+        - name: source
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - hackernews
+              - reddit
+              - google_trends
+              - producthunt
+          description: Filter by data source.
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 50
+          description: Maximum number of topics to return.
+      responses:
+        "200":
+          description: Trending topics retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrendingTopicsResponse"
+        "401":
+          description: Missing or invalid API key.
+
+  /chat/title:
+    post:
+      operationId: brainstormTitles
+      summary: Brainstorm blog titles via chat
+      description: |
+        Have an interactive conversation with AI to brainstorm compelling blog titles.
+        Send your conversation history as an array of messages. The AI will ask
+        clarifying questions and then suggest titles tailored to your topic.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TitleChatRequest"
+      responses:
+        "200":
+          description: Chat response generated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TitleChatResponse"
+        "401":
+          description: Missing or invalid API key.
+        "429":
+          description: Usage limit exceeded.
+
+  /publish:
+    post:
+      operationId: publishContent
+      summary: Publish content to platforms
+      description: |
+        Publish content to one or more connected social media platforms in a single request.
+        Platforms must be connected via the BlogBurst dashboard before publishing.
+        Supports text, images, and video depending on the platform.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PublishRequest"
+      responses:
+        "200":
+          description: Publish results for each platform.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublishResponse"
+        "400":
+          description: No platforms specified or platforms not connected.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDetail"
+        "401":
+          description: Missing or invalid API key.
+
+  /publish/connected:
+    get:
+      operationId: getConnectedPlatforms
+      summary: Get connected platforms
+      description: |
+        List all social media platforms the user has connected, along with
+        usernames, connection dates, and platform capabilities (text, image, video support).
+      responses:
+        "200":
+          description: Connected platforms list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConnectedPlatformsResponse"
+        "401":
+          description: Missing or invalid API key.
+
+  /usage:
+    get:
+      operationId: getUsageStats
+      summary: Get usage statistics
+      description: |
+        Get the authenticated user's current usage statistics including plan details,
+        generation counts, remaining quota, and recent generation history.
+      responses:
+        "200":
+          description: Usage statistics.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsageResponse"
+        "401":
+          description: Missing or invalid API key.

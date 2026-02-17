@@ -1,6 +1,6 @@
 {
   "name": "blogburst-mcp-server",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "MCP server for BlogBurst — AI content generation, repurposing, and multi-platform publishing",
   "type": "module",
   "main": "build/index.js",
@@ -30,6 +30,7 @@
     "email": "nemo.shen@mst-sg.com",
     "url": "https://blogburst.ai"
   },
+  "mcpName": "io.github.shensi8312/blogburst-mcp-server",
   "license": "MIT",
   "homepage": "https://blogburst.ai",
   "repository": {
