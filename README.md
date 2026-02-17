@@ -26,7 +26,7 @@ Add to your `claude_desktop_config.json`:
   "mcpServers": {
     "blogburst": {
       "command": "npx",
-      "args": ["-y", "@blogburst/mcp-server"],
+      "args": ["-y", "blogburst-mcp-server"],
       "env": {
         "BLOGBURST_API_KEY": "your-api-key-here"
       }

@@ -1,5 +1,5 @@
 {
-  "name": "@blogburst/mcp-server",
+  "name": "blogburst-mcp-server",
   "version": "1.0.0",
   "description": "MCP server for BlogBurst — AI content generation, repurposing, and multi-platform publishing",
   "type": "module",
