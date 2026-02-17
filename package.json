@@ -1,0 +1,46 @@
+{
+  "name": "@blogburst/mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for BlogBurst — AI content generation, repurposing, and multi-platform publishing",
+  "type": "module",
+  "main": "build/index.js",
+  "bin": {
+    "blogburst-mcp": "./build/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/index.js",
+    "dev": "tsc --watch"
+  },
+  "files": [
+    "build"
+  ],
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "blogburst",
+    "content-generation",
+    "social-media",
+    "ai",
+    "blog",
+    "repurpose"
+  ],
+  "author": {
+    "name": "BlogBurst",
+    "email": "nemo.shen@mst-sg.com",
+    "url": "https://blogburst.ai"
+  },
+  "license": "MIT",
+  "homepage": "https://blogburst.ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shensi8312/blogburst-mcp-server"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
