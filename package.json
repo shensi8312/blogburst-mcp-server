@@ -1,7 +1,7 @@
 {
   "name": "blogburst-mcp-server",
-  "version": "1.0.1",
-  "description": "MCP server for BlogBurst — AI content generation, repurposing, and multi-platform publishing",
+  "version": "2.0.0",
+  "description": "MCP server for BlogBurst — AI social media marketing agent. Generate content, auto-publish to 9 platforms, manage auto-pilot, track analytics, and more via natural conversation.",
   "type": "module",
   "main": "build/index.js",
   "bin": {
@@ -23,7 +23,12 @@
     "social-media",
     "ai",
     "blog",
-    "repurpose"
+    "repurpose",
+    "auto-pilot",
+    "marketing-agent",
+    "twitter",
+    "bluesky",
+    "linkedin"
   ],
   "author": {
     "name": "BlogBurst",

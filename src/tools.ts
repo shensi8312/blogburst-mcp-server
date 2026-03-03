@@ -247,6 +247,99 @@ export const tools: Tool[] = [
       properties: {},
     },
   },
+  {
+    name: "agent_chat",
+    description:
+      "Chat with your AI marketing agent. It can generate content, check analytics, manage auto-pilot, view trending topics, and more — all through natural conversation. This is the most powerful tool — use it for any complex or multi-step marketing task.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        messages: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              role: {
+                type: "string",
+                enum: ["user", "assistant"],
+              },
+              content: {
+                type: "string",
+              },
+            },
+            required: ["role", "content"],
+          },
+          description:
+            'Conversation messages. Start with a user message, e.g. [{"role": "user", "content": "Generate a Twitter post about my product"}]. For multi-turn, include the full history.',
+        },
+        language: {
+          type: "string",
+          enum: ["en", "zh"],
+          description: "Language for responses (default: en)",
+        },
+      },
+      required: ["messages"],
+    },
+  },
+  {
+    name: "get_auto_pilot_status",
+    description:
+      "Check the status of your autonomous posting agent (auto-pilot). Shows if enabled, which platforms, posts per day, timezone, and last run time.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {},
+    },
+  },
+  {
+    name: "configure_auto_pilot",
+    description:
+      "Configure the autonomous posting agent. Enable/disable auto-pilot, set posting frequency, choose platforms, and set timezone.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        enabled: {
+          type: "boolean",
+          description: "Enable or disable auto-pilot",
+        },
+        posts_per_day: {
+          type: "number",
+          description: "Number of posts per day (1-10)",
+        },
+        platforms: {
+          type: "array",
+          items: {
+            type: "string",
+            enum: [
+              "twitter",
+              "linkedin",
+              "reddit",
+              "bluesky",
+              "threads",
+              "telegram",
+              "discord",
+              "tiktok",
+              "youtube",
+            ],
+          },
+          description: "Platforms to auto-post to",
+        },
+        timezone: {
+          type: "string",
+          description:
+            'Timezone for scheduling posts (e.g. "America/New_York", "Asia/Shanghai")',
+        },
+      },
+    },
+  },
+  {
+    name: "run_auto_pilot_now",
+    description:
+      "Trigger the auto-pilot to generate and publish content immediately, without waiting for the next scheduled run.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {},
+    },
+  },
 ];
 
 export async function handleToolCall(
@@ -315,6 +408,31 @@ export async function handleToolCall(
 
       case "get_usage":
         result = await get("/usage");
+        break;
+
+      case "agent_chat":
+        result = await post("/assistant/agent-chat-v2", {
+          messages: args.messages,
+          language: args.language || "en",
+        });
+        break;
+
+      case "get_auto_pilot_status":
+        result = await get("/assistant/auto-pilot");
+        break;
+
+      case "configure_auto_pilot": {
+        const body: Record<string, unknown> = {};
+        if (args.enabled !== undefined) body.enabled = args.enabled;
+        if (args.posts_per_day !== undefined) body.posts_per_day = args.posts_per_day;
+        if (args.platforms !== undefined) body.platforms = args.platforms;
+        if (args.timezone !== undefined) body.timezone = args.timezone;
+        result = await post("/assistant/auto-pilot", body);
+        break;
+      }
+
+      case "run_auto_pilot_now":
+        result = await post("/assistant/auto-pilot/run-now", {});
         break;
 
       default:
