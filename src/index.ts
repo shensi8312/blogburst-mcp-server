@@ -8,25 +8,34 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { tools, handleToolCall } from "./tools.js";
 
-const server = new Server(
-  {
-    name: "blogburst-mcp",
-    version: "2.0.0",
-  },
-  {
-    capabilities: {
-      tools: {},
+function createServer() {
+  const server = new Server(
+    {
+      name: "blogburst-mcp",
+      version: "2.0.0",
     },
-  }
-);
+    {
+      capabilities: {
+        tools: {},
+      },
+    }
+  );
 
-server.setRequestHandler(ListToolsRequestSchema, async () => {
-  return { tools };
-});
+  server.setRequestHandler(ListToolsRequestSchema, async () => {
+    return { tools };
+  });
 
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  return handleToolCall(request.params.name, request.params.arguments ?? {});
-});
+  server.setRequestHandler(CallToolRequestSchema, async (request) => {
+    return handleToolCall(request.params.name, request.params.arguments ?? {});
+  });
+
+  return server;
+}
+
+// Smithery sandbox: export for capability scanning without real credentials
+export function createSandboxServer() {
+  return createServer();
+}
 
 async function main() {
   const apiKey = process.env.BLOGBURST_API_KEY;
@@ -37,6 +46,7 @@ async function main() {
     process.exit(1);
   }
 
+  const server = createServer();
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.error("BlogBurst MCP server running on stdio");
