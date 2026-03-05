@@ -340,6 +340,105 @@ export const tools: Tool[] = [
       properties: {},
     },
   },
+  {
+    name: "list_ecommerce_products",
+    description:
+      "List all e-commerce products in your catalog. Shows product name, price, category, AI analysis status, and post/video counts.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {},
+    },
+  },
+  {
+    name: "create_ecommerce_product",
+    description:
+      "Add a new e-commerce product to your catalog. After creating, upload images and run AI analysis.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        name: { type: "string", description: "Product name" },
+        price: { type: "number", description: "Product price" },
+        currency: { type: "string", description: "Currency code (default: USD)" },
+        category: { type: "string", description: "Product category" },
+        description: { type: "string", description: "Product description" },
+        purchase_url: { type: "string", description: "Link to buy the product" },
+      },
+      required: ["name"],
+    },
+  },
+  {
+    name: "analyze_ecommerce_product",
+    description:
+      "Run AI Vision analysis on a product's images. Extracts selling points, target audience, visual features, and content ideas. Product must have images uploaded first.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        item_id: { type: "number", description: "Product ID to analyze" },
+        language: { type: "string", enum: ["en", "zh"], description: "Analysis language" },
+      },
+      required: ["item_id"],
+    },
+  },
+  {
+    name: "generate_product_video",
+    description:
+      "Generate a TikTok-ready video from product images. Uses FFmpeg (free), Kling AI, or Runway depending on your plan.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        item_id: { type: "number", description: "Product ID to generate video for" },
+        provider: { type: "string", enum: ["ffmpeg", "kling", "runway"], description: "Video provider (auto-selected by plan if not specified)" },
+      },
+      required: ["item_id"],
+    },
+  },
+  {
+    name: "discover_competitors",
+    description:
+      "AI discovers your top competitors using Google Search. Analyzes your product category and finds similar brands/sellers.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        language: { type: "string", enum: ["en", "zh"], description: "Language for discovery" },
+      },
+    },
+  },
+  {
+    name: "list_competitors",
+    description:
+      "List all tracked competitors with their analysis data, threat levels, and comparison scores.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {},
+    },
+  },
+  {
+    name: "get_competitive_insights",
+    description:
+      "Generate a comprehensive competitive landscape analysis with opportunities, threats, and priority actions.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        language: { type: "string", enum: ["en", "zh"], description: "Language for insights" },
+      },
+    },
+  },
+  {
+    name: "submit_content_feedback",
+    description:
+      "Rate agent-generated content with thumbs up/down. The AI learns from your preferences and adjusts future content accordingly.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        target_type: { type: "string", enum: ["post", "opportunity", "suggestion", "content_type"], description: "What you're rating" },
+        target_id: { type: "string", description: "ID of the item being rated" },
+        rating: { type: "string", enum: ["thumbs_up", "thumbs_down"], description: "Your rating" },
+        comment: { type: "string", description: "Optional feedback comment" },
+        content_type: { type: "string", description: "Content type (e.g. product_showcase, lifestyle)" },
+      },
+      required: ["target_type", "rating"],
+    },
+  },
 ];
 
 export async function handleToolCall(
@@ -433,6 +532,57 @@ export async function handleToolCall(
 
       case "run_auto_pilot_now":
         result = await post("/assistant/auto-pilot/run-now", {});
+        break;
+
+      case "list_ecommerce_products":
+        result = await get("/ecommerce/products");
+        break;
+
+      case "create_ecommerce_product":
+        result = await post("/ecommerce/products", {
+          name: args.name,
+          price: args.price,
+          currency: args.currency || "USD",
+          category: args.category,
+          description: args.description,
+          purchase_url: args.purchase_url,
+        });
+        break;
+
+      case "analyze_ecommerce_product":
+        result = await post(`/ecommerce/products/${args.item_id}/analyze`, {
+          language: args.language || "en",
+        });
+        break;
+
+      case "generate_product_video":
+        result = await post(`/ecommerce/products/${args.item_id}/video`, {
+          provider: args.provider,
+        });
+        break;
+
+      case "discover_competitors":
+        result = await post("/competitors/discover", {
+          language: args.language || "en",
+        });
+        break;
+
+      case "list_competitors":
+        result = await get("/competitors");
+        break;
+
+      case "get_competitive_insights":
+        result = await get(`/competitors/insights${args.language ? `?language=${args.language}` : ""}`);
+        break;
+
+      case "submit_content_feedback":
+        result = await post("/feedback/content", {
+          target_type: args.target_type,
+          target_id: args.target_id,
+          rating: args.rating,
+          comment: args.comment,
+          content_type: args.content_type,
+        });
         break;
 
       default:
