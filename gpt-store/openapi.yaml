@@ -16,17 +16,16 @@ servers:
     description: Production
 
 security:
-  - apiKey: []
+  - bearerAuth: []
 
 components:
   securitySchemes:
-    apiKey:
-      type: apiKey
-      in: header
-      name: X-API-Key
+    bearerAuth:
+      type: http
+      scheme: bearer
       description: |
-        API key for authentication. Obtain one from the BlogBurst dashboard
-        at https://blogburst.ai/dashboard under API Keys.
+        Use your BlogBurst API key as the Bearer token.
+        Get one free at https://blogburst.ai/dashboard under API Keys.
 
   schemas:
     # --- Enums ---

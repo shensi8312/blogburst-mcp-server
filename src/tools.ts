@@ -204,7 +204,7 @@ export const tools: Tool[] = [
   {
     name: "publish_content",
     description:
-      "Publish content directly to your connected social media platforms (Bluesky, Telegram, Discord). Requires platforms to be connected in your BlogBurst dashboard.",
+      "Publish content directly to your connected social media platforms (Twitter/X, Bluesky, Telegram, Discord). Requires platforms to be connected first at https://blogburst.ai/dashboard/connections — Twitter/X is one-click OAuth (5 seconds).",
     inputSchema: {
       type: "object" as const,
       properties: {
@@ -212,9 +212,9 @@ export const tools: Tool[] = [
           type: "array",
           items: {
             type: "string",
-            enum: ["bluesky", "telegram", "discord"],
+            enum: ["twitter", "bluesky", "telegram", "discord"],
           },
-          description: "Platforms to publish to (must be connected first)",
+          description: "Platforms to publish to (must be connected first at https://blogburst.ai/dashboard/connections)",
         },
         content: {
           type: "string",
@@ -598,11 +598,17 @@ export async function handleToolCall(
       ],
     };
   } catch (error) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    // Enhance "not connected" errors with actionable guidance
+    const isNotConnected = errMsg.toLowerCase().includes("not connected");
+    const guidance = isNotConnected
+      ? `\n\n💡 To connect your platforms, visit: https://blogburst.ai/dashboard/connections\nTwitter/X is the easiest — one-click OAuth, takes 5 seconds!`
+      : "";
     return {
       content: [
         {
           type: "text",
-          text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+          text: `Error: ${errMsg}${guidance}`,
         },
       ],
       isError: true,
