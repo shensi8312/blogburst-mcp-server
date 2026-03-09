@@ -70,15 +70,17 @@ Ask Claude:
 
 | Platform | Auto-Publish | Content Style |
 |----------|:---:|---------------|
-| Twitter/X | Copy-only | Threads with hooks (280 chars/tweet) |
-| LinkedIn | Coming soon | Professional insights + hashtags |
-| Bluesky | Yes | Short authentic posts (300 chars) |
-| Telegram | Yes | Rich formatted broadcasts |
-| Discord | Yes | Community-friendly announcements |
+| Twitter/X | ✅ Yes | Threads with hooks (280 chars/tweet) |
+| Bluesky | ✅ Yes | Short authentic posts (300 chars) |
+| Telegram | ✅ Yes | Rich formatted broadcasts |
+| Discord | ✅ Yes | Community-friendly announcements |
 | Reddit | Copy-only | Discussion posts + subreddit suggestions |
 | TikTok | Copy-only | Hook + script + caption + hashtags |
 | YouTube | Copy-only | Title + description + script + tags |
+| LinkedIn | Coming soon | Professional insights + hashtags |
 | Threads | Coming soon | Conversational posts |
+
+**Important**: To auto-publish, first connect your platforms at [Dashboard > Connections](https://blogburst.ai/dashboard/connections). Twitter/X is one-click OAuth — takes 5 seconds.
 
 ## Pricing
 
