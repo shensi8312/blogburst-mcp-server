@@ -1,7 +1,7 @@
 {
   "name": "blogburst-mcp-server",
-  "version": "3.1.0",
-  "description": "MCP server for BlogBurst — self-improving AI marketing agent. E-commerce product analysis, AI video generation, competitor intelligence, auto-pilot publishing to 9 platforms, continuous learning from data and feedback.",
+  "version": "3.2.0",
+  "description": "MCP server for BlogBurst — your Virtual CMO. Autonomous AI marketing agent: auto-post to Twitter/X, Bluesky, Telegram, Discord, auto-engage (replies, likes, follows), SEO/GEO audits, competitor intelligence, community scanner, growth diagnostic, task management. Free tier available.",
   "type": "module",
   "main": "build/index.js",
   "bin": {

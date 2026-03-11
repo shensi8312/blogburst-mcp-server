@@ -41,7 +41,12 @@ async function main() {
   const apiKey = process.env.BLOGBURST_API_KEY;
   if (!apiKey) {
     console.error(
-      "BLOGBURST_API_KEY environment variable is required. Get your free key at https://blogburst.ai/dashboard/api-keys"
+      "BLOGBURST_API_KEY is required. Setup (2 min):\n" +
+      "1. Sign up free: https://blogburst.ai\n" +
+      "2. Set up your product: Dashboard > Strategy\n" +
+      "3. Connect platforms: Dashboard > Connections (Twitter is one-click OAuth)\n" +
+      "4. Get API key: Dashboard > API Keys\n" +
+      "5. Add to your MCP config: \"env\": { \"BLOGBURST_API_KEY\": \"your-key\" }"
     );
     process.exit(1);
   }
